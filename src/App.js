@@ -1,6 +1,6 @@
 import './App.css';
 import React, { Component } from 'react'
-
+import LoadingSpiner from './LoadingSpiner';
 
 export default class App extends Component {
   constructor(props){
@@ -9,30 +9,37 @@ export default class App extends Component {
     this.state = {
       query : "eevee",
       pokemon: "",
-      err:""
+      err:"",
+      Loading:false
     }
   }
+
+
+
 componentDidMount(){
-  this.getPokemon()
+  this.getPokemon() 
 }
 
   getPokemon = async () => {
     try {
+      this.setState({Loading:true})
       const res = await fetch (`https://pokeapi.co/api/v2/pokemon/${this.state.query.toLowerCase()}`)
-      const data = await res.json()
+      const data = await res.json() 
       
       console.log(data)
 
       this.setState({
         pokemon: data ,
-        err : null
+        err : null ,
+        Loading: false
 
       })
     
     } catch(err){
       this.setState({
         pokemon: null,
-        err
+        err,
+        Loading:false
 
       })
 
@@ -45,7 +52,16 @@ componentDidMount(){
 
   handleSubmit = e =>{
     e.preventDefault()
-    this.getPokemon()
+    if (this.state.query.trim() === '') {
+      this.setState({
+        pokemon: null
+        
+      });
+    } else {
+      this.getPokemon();
+    }
+
+
   }
 
 
@@ -64,7 +80,13 @@ componentDidMount(){
         </form>
 
 
-        {this.state.pokemon && !this.state.err ?(
+
+        {this.state.Loading ? (
+          <div  >
+            <LoadingSpiner />
+            
+          </div>
+        ) : this.state.pokemon && !this.state.err  ?(
             <div className='pokemon-pic'>
             <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${this.state.pokemon.id}.png`} alt=''/>
             <h2 className='pokemon-name-title'>{this.state.pokemon.name}</h2>
